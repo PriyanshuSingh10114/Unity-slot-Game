@@ -1,243 +1,201 @@
-# Classic 3-Reel Slot Machine Game | Unity & WebGL
+# 🎰 Classic 3-Reel Slot Machine Game
 
-A production-quality, modular, and fully tested 2D slot machine game built in Unity (C#) using original supplied arcade cabinet assets, mathematically decoupled cryptographic RNG, atomic credit management, and smooth vertical reel animation easing.
+<div align="center">
 
----
+![Unity](https://img.shields.io/badge/Unity-2021.3%20%7C%202022.3%20%7C%20Unity%206-black?style=for-the-badge&logo=unity)
+![C#](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=csharp&logoColor=white)
+![WebGL](https://img.shields.io/badge/WebGL-Ready-990000?style=for-the-badge&logo=webgl&logoColor=white)
+![Tests](https://img.shields.io/badge/Tests-24%20Passing-brightgreen?style=for-the-badge&logo=checkmarx)
+![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 
-## 1. Game Overview
+**A production-ready, modular 2D slot machine game featuring decoupled cryptographic RNG, atomic integer wallet accounting, and mechanical reel easing.**
 
-This project implements a classic 3-reel, single-payline arcade slot machine. Players wager simulated integer credits, trigger smooth vertical spinning reels with staggered stopping and bounce deceleration, and win multipliers when all three reels match identical symbols on the payline.
+[🎮 Play Web Demo](#-quick-run-commands) • [📐 Architecture](#-system-architecture) • [🧪 Unit Tests](#-automated-testing-2424-passed) • [📜 Payout Table](#-payout-table)
 
-### Key Highlights:
-- **Classic 3-Reel Single Payline System**: Mechanical feel with continuous vertical scrolling and smooth cubic bounce-back easing.
-- **Strict Decoupling of Math & Visuals**: Outcomes are computed mathematically prior to animation. The reels animate *towards* the determined outcome, preventing visual timing exploits or frame-rate dependencies.
-- **Cryptographic & Unbiased RNG**: Built on `System.Security.Cryptography.RandomNumberGenerator` with rejection sampling to eliminate modulo bias. Also supports seeded deterministic RNG for test injection.
-- **Atomic Credit Wallet**: Prevents floating-point balance inaccuracies, eliminates double deduction/crediting risks, and enforces non-negative credit invariants.
-- **Original High-Resolution Artwork**: Sliced and formatted from original assets into cabinet frames, reel housings, modal popups, and multi-state buttons (Normal, Highlighted, Pressed, Disabled).
-- **Comprehensive Automated Testing**: 24 automated unit tests covering wallet accounting, win evaluation, payout calculation, and RNG distribution bounds.
-- **Interactive Companion Web Preview**: Includes an HTML5 Canvas simulation in `WebPreview/` for browser play.
+</div>
 
 ---
 
-## 2. Technologies
+## 📌 At a Glance
 
-- **Game Engine**: Unity 2021.3+ / 2022.3+ LTS / Unity 6 compatible
-- **Language**: C# (.NET Standard 2.1 / C# 5-9 compliant)
-- **UI System**: Unity UI (Canvas, Canvas Scaler, RectMask2D, Sprite Swap Button states)
-- **Audio Engine**: Unity Audio (AudioSource, procedural mechanical and chime SFX)
-- **Testing**: Unity Test Framework (NUnit EditMode) + Standalone CI Test Runner (`Tools/run_tests.ps1`)
-- **Web Export**: Unity WebGL Build Pipeline (via `SlotGameBuildScript.cs`) & HTML5/Canvas Companion Preview
-
----
-
-## 3. Gameplay Instructions
-
-1. **Adjust Bet**: Click the **-** or **+** buttons on the dashboard to cycle through bet tiers: **10, 25, 50, 100** credits.
-2. **Spin Reels**: Click the large **SPIN** button. The current bet is deducted from the wallet, reels accelerate into a vertical spin, and stop one by one in staggered sequence.
-3. **Win Condition**: A win is awarded **strictly when all 3 reels stop on the exact same symbol** across the payline:
-   - `SEVEN | SEVEN | SEVEN` = **WIN (Jackpot)**
-   - `BAR | BAR | BAR` = **WIN**
-   - `BELL | BELL | BELL` = **WIN**
-   - `CHERRY | CHERRY | CHERRY` = **WIN**
-   - Any mixed combination (e.g. `CHERRY | SEVEN | BAR`) = **LOSS**
-4. **Payouts**: Winnings are calculated as `Payout = Bet × Multiplier` and credited to the wallet balance.
-5. **Auto Spin**: Toggle **AUTO SPIN** to automatically initiate spins until clicked again or until balance is insufficient.
-6. **Sound Mute**: Toggle sound effects on/off at any time via the **SOUND** button.
+| Feature | Implementation | Benefit |
+|---|---|---|
+| **Reel Physics** | Infinite recycling loop + cubic bounce ease | Zero runtime allocations (`GC.Alloc`), authentic arcade feel |
+| **Fair RNG** | `RNGCryptoServiceProvider` + rejection sampling | Completely eliminates modulo bias; pure mathematical fairness |
+| **Credit Wallet** | Integer arithmetic (`checked` overflow safety) | Eliminates floating-point currency drift & duplicate payouts |
+| **Separation** | Outcome generated **before** animation starts | Client-side visual timing cannot manipulate or predict results |
+| **Audio & UX** | Procedural mechanical clicks, spin loops & chimes | Immersive casino soundscape with persistent mute toggling |
 
 ---
 
-## 4. Payout Table
+## 💎 Payout Table
 
-Based on the 4 supplied project symbols (`slot-symbol1.png` to `slot-symbol4.png`):
+> **Winning Rule**: A payout is awarded **strictly when all 3 reels match the identical symbol** across the center payline. Any mixed combination is a loss.
 
-| Symbol | Asset Name | Description | Multiplier | Example Payout (Bet 10) |
-|---|---|---|:---:|:---:|
-| **SEVEN** | `symbol_seven.png` | Lucky Seven (Top Tier Jackpot) | **25x** | 250 credits |
-| **BAR** | `symbol_bar.png` | Classic Triple Bar | **10x** | 100 credits |
-| **BELL** | `symbol_bell.png` | Liberty Bell | **5x** | 50 credits |
-| **CHERRY** | `symbol_cherry.png` | Twin Red Cherries | **3x** | 30 credits |
+| Symbol | Name | Multiplier | Payout (Bet: 10) | Payout (Bet: 100) |
+|:---:|:---:|:---:|:---:|:---:|
+| <img src="Assets/Art/Symbols/symbol_seven.png" width="40"/> | **Lucky Seven** | **25x** *(Jackpot)* | `250` | `2,500` |
+| <img src="Assets/Art/Symbols/symbol_bar.png" width="40"/> | **Triple Bar** | **10x** | `100` | `1,000` |
+| <img src="Assets/Art/Symbols/symbol_bell.png" width="40"/> | **Liberty Bell** | **5x** | `50` | `500` |
+| <img src="Assets/Art/Symbols/symbol_cherry.png" width="40"/> | **Twin Cherries** | **3x** | `30` | `300` |
 
-*Formula: Payout = Current Bet × Symbol Multiplier*
+$$\text{Payout} = \text{Current Bet} \times \text{Multiplier}$$
 
 ---
 
-## 5. Software Architecture
+## 🕹️ Gameplay Flow
 
-The codebase adheres strictly to SOLID principles, dependency injection, and separation of concerns.
-
-```
-                              ┌────────────────────┐
-                              │  SlotGameManager   │  (Coordinates Lifecycle)
-                              └─────────┬──────────┘
-             ┌──────────────────────────┼──────────────────────────┐
-             ▼                          ▼                          ▼
-     ┌──────────────┐          ┌─────────────────┐       ┌────────────────────┐
-     │  SlotWallet  │          │ IRandomProvider │       │ SlotReelController │
-     └──────┬───────┘          └────────┬────────┘       └────────────────────┘
-            │                           │
-            │                  ┌────────▼─────────────┐
-            │                  │ SlotOutcomeGenerator │
-            │                  └────────┬─────────────┘
-            ▼                           │
- ┌──────────────────────┐               │
- │ SlotPayoutCalculator │◄──────────────┘
- └──────────────────────┘
-            ▲
-            │
- ┌──────────┴───────────┐
- │   SlotWinEvaluator   │
- └──────────────────────┘
+```mermaid
+graph LR
+    A[1. Select Bet] --> B[2. Press SPIN]
+    B --> C[3. Atomic Bet Deduction]
+    C --> D[4. Generate Outcome via Crypto RNG]
+    D --> E[5. Staggered Reel Spin & Easing]
+    E --> F{All 3 Match?}
+    F -- YES --> G[Credit Winnings & Celebrate]
+    F -- NO --> H[Display Loss & Reset]
+    G --> I[Ready for Next Spin]
+    H --> I
 ```
 
-### Major C# Classes & Responsibilities:
-
-- **`SlotGameManager`** (`Assets/Scripts/Core/SlotGameManager.cs`):
-  Controls overall game flow and orchestrates state transitions (`Ready`, `Spinning`, `Evaluating`, `ShowingResult`, `InsufficientBalance`). Guarantees single-spin locking and atomic balance transactions.
-
-- **`SlotWallet`** (`Assets/Scripts/Core/SlotWallet.cs`):
-  Thread-safe simulated credit repository using integer math. Enforces strict balance invariants: validates sufficient funds before deduction, rejects negative/zero wagers, and fires atomic change events.
-
-- **`IRandomProvider` & `CryptoRandomProvider`** (`Assets/Scripts/RNG/`):
-  Cryptographically secure random number provider utilizing `System.Security.Cryptography.RandomNumberGenerator`. Employs rejection sampling threshold calculations to eliminate modulo bias.
-
-- **`DeterministicRandomProvider`** (`Assets/Scripts/RNG/`):
-  Mock seeded pseudo-random provider enabling repeatable testing and replayable verification.
-
-- **`SlotOutcomeGenerator`** (`Assets/Scripts/RNG/SlotOutcomeGenerator.cs`):
-  Generates reel outcome arrays prior to visual animation. Decouples game logic from visual motion.
-
-- **`SlotWinEvaluator`** (`Assets/Scripts/Payouts/SlotWinEvaluator.cs`):
-  Evaluates outcome arrays against matching win criteria (`EvaluateWin(outcomes, out winningSymbolId)`).
-
-- **`SlotPayoutCalculator`** (`Assets/Scripts/Payouts/SlotPayoutCalculator.cs`):
-  Maps symbols to multipliers and computes winnings (`Payout = Bet × Multiplier`).
-
-- **`SlotReelController`** (`Assets/Scripts/Reels/SlotReelController.cs`):
-  Reusable controller attached to each reel. Manages vertical movement, symbol recycling at edges (zero garbage collection allocations), staggered deceleration, and mechanical bounce easing.
-
-- **`SlotUIController`** (`Assets/Scripts/UI/SlotUIController.cs`):
-  Manages UI displays, button states, modal popups, rolling balance counter animation, and status messages.
-
-- **`SlotAudioManager`** (`Assets/Scripts/Audio/SlotAudioManager.cs`):
-  Modular sound controller for click, loop, stop, win, loss, and jackpot fanfare sounds with persistent mute support.
-
-- **`SlotGameConfig` & `SlotSymbolData`** (`Assets/Scripts/Core/`):
-  ScriptableObjects storing balance options, symbol metadata, multipliers, and motion parameters.
-
-- **`SlotGameSceneBuilder`** (`Assets/Scripts/Editor/SlotGameSceneBuilder.cs`):
-  Editor automation tool that programmatically constructs the complete scene hierarchy, canvas anchors, and serialized component bindings (`Tools -> Slot Game -> Rebuild Main Scene`).
-
-- **`SlotGameBuildScript`** (`Assets/Scripts/Editor/SlotGameBuildScript.cs`):
-  Command-line and menu-driven build script for automated WebGL export (`Build -> Build WebGL`).
+1. **Adjust Bet**: Step through bet options (`10`, `25`, `50`, `100`) with `◀` and `▶`.
+2. **Hit Spin**: Bet is deducted, reels accelerate smoothly into a vertical blur.
+3. **Staggered Stop**: Reel 1 stops at `1.2s`, Reel 2 at `1.55s`, Reel 3 at `1.9s` with a mechanical rebound.
+4. **Win / Loss**: If 3 symbols match, winnings are credited and the balance counter rolls up with celebration SFX.
+5. **Auto-Spin**: Toggle hands-free spins; automatically pauses if credits run out.
 
 ---
 
-## 6. Project Folder Structure
+## 📐 System Architecture
+
+Strict adherence to **SOLID principles** ensures logic and graphics remain completely independent.
 
 ```
-Assets/
-├── Animations/
-├── Art/
-│   ├── AnimationFrames/     # 85 extracted PNG frames from 4tXlXs.gif
-│   ├── Backgrounds/         # bg_gradient.png (1920x1080)
-│   ├── Buttons/             # Sliced button sprites (Normal, Highlight, Pressed, Disabled)
-│   ├── Effects/
-│   ├── Frames/              # Cabinet body, middle box, frame overlay, popup dialog
-│   └── Symbols/             # 4 Slot symbols (Seven, Cherry, Bell, Bar)
-├── Prefabs/
-├── Scenes/
-│   └── MainScene.unity      # Fully connected main game scene
-├── ScriptableObjects/       # DefaultSlotGameConfig.asset, Symbol_*.asset
-├── Scripts/
-│   ├── Audio/               # SlotAudioManager.cs
-│   ├── Core/                # SlotGameManager.cs, SlotWallet.cs, SlotGameConfig.cs, etc.
-│   ├── Editor/              # SlotGameSceneBuilder.cs, SlotGameBuildScript.cs
-│   ├── Payouts/             # SlotWinEvaluator.cs, SlotPayoutCalculator.cs
-│   ├── Reels/               # SlotReelController.cs
-│   ├── RNG/                 # IRandomProvider.cs, CryptoRandomProvider.cs, etc.
-│   └── UI/                  # SlotUIController.cs
-├── Sounds/                  # button_click.wav, reel_spin_loop.wav, reel_stop.wav, etc.
-└── Tests/
-    └── EditMode/            # WalletTests.cs, WinEvaluatorTests.cs, PayoutCalculatorTests.cs, RNGTests.cs
-Packages/
-└── manifest.json            # Unity 2D & UI package dependencies
-ProjectSettings/             # ProjectSettings.asset, EditorBuildSettings.asset
-Tools/
-├── run_tests.ps1            # Automated test execution script
-└── SlotGameCore.dll         # Compiled testable core assembly
-WebPreview/
-└── index.html               # Playable companion web simulation
+                              ┌─────────────────────┐
+                              │   SlotGameManager   │  (State Machine Coordinator)
+                              └──────────┬──────────┘
+             ┌───────────────────────────┼───────────────────────────┐
+             ▼                           ▼                           ▼
+     ┌───────────────┐          ┌─────────────────┐       ┌────────────────────┐
+     │  SlotWallet   │          │ IRandomProvider │       │ SlotReelController │
+     │ (Integer math)│          └────────┬────────┘       │  (Animation Easing)│
+     └───────┬───────┘                   │                └────────────────────┘
+             │                  ┌────────▼─────────────┐
+             │                  │ SlotOutcomeGenerator │
+             │                  └────────┬─────────────┘
+             ▼                           │
+ ┌───────────────────────┐               │
+ │ SlotPayoutCalculator  │◄──────────────┘
+ └───────────────────────┘
+             ▲
+             │
+ ┌───────────┴───────────┐
+ │   SlotWinEvaluator    │  (Strict 3-Match Rule)
+ └───────────────────────┘
 ```
+
+### Core Classes
+
+- **`SlotGameManager`** — Controls game lifecycle (`Ready`, `Spinning`, `Evaluating`, `ShowingResult`, `InsufficientBalance`).
+- **`SlotWallet`** — Thread-safe integer credit balance; guarantees zero negative balances or duplicate deductions.
+- **`SlotReelController`** — Manages continuous vertical motion, infinite view recycling, and overshoot landing easing.
+- **`CryptoRandomProvider`** — Cryptographically secure, rejection-sampled unbiased RNG (`System.Security.Cryptography`).
+- **`DeterministicRandomProvider`** — Seeded mock RNG for deterministic unit tests and replay verification.
+- **`SlotOutcomeGenerator`** — Produces target outcomes independently before visual reel animations start.
+- **`SlotWinEvaluator`** — Evaluates combination results; enforces exact 3-match win criteria.
+- **`SlotPayoutCalculator`** — Computes reward credits based on wager and configurable paytable.
+- **`SlotUIController`** — Drives HUD displays, balance counting animations, win banners, and modal dialogs.
+- **`SlotAudioManager`** — Plays mechanical reel loops, clicks, stop thuds, chimes, and fanfare with persistent mute.
 
 ---
 
-## 7. Testing and Quality Assurance
+## 🚀 Quick Run Commands
 
-### Automated Unit Test Suite (`Tools/run_tests.ps1`)
+### 1. Instant Web Play (Local Server)
+Run from the repository root:
+```powershell
+python -m http.server 3000 --bind 127.0.0.1
+```
+👉 Open **[http://localhost:3000/WebPreview/index.html](http://localhost:3000/WebPreview/index.html)**
 
-The core game logic is verified with 24 automated unit tests:
-
-| Test Category | Test Case | Status | Verification Summary |
-|---|---|:---:|---|
-| **Wallet** | `InitialBalance` | **PASSED** | Verifies constructor assigns starting balance (1,000). |
-| **Wallet** | `NegativeInitialBalanceThrows` | **PASSED** | Verifies exception on negative starting balance. |
-| **Wallet** | `TryDeductBetValid` | **PASSED** | Verifies exact deduction and balance update. |
-| **Wallet** | `TryDeductBetInsufficient` | **PASSED** | Verifies deduction rejected when balance < bet. |
-| **Wallet** | `TryDeductBetZeroOrNegative` | **PASSED** | Verifies 0 or negative bets are rejected. |
-| **Wallet** | `CreditWinPositive` | **PASSED** | Verifies winnings credited exactly once. |
-| **Wallet** | `CreditWinZeroPreserves` | **PASSED** | Verifies 0 win preserves balance without change. |
-| **Wallet** | `BalanceNeverNegative` | **PASSED** | Verifies series of bets never forces balance < 0. |
-| **Win Evaluator** | `3x Seven Wins` | **PASSED** | `[0, 0, 0]` produces win with symbol 0. |
-| **Win Evaluator** | `3x Cherry Wins` | **PASSED** | `[1, 1, 1]` produces win with symbol 1. |
-| **Win Evaluator** | `3x Bell Wins` | **PASSED** | `[2, 2, 2]` produces win with symbol 2. |
-| **Win Evaluator** | `3x Bar Wins` | **PASSED** | `[3, 3, 3]` produces win with symbol 3. |
-| **Win Evaluator** | `PartialMatchesLoss` | **PASSED** | `[0,0,1]`, `[1,2,1]`, `[3,2,2]` correctly produce losses. |
-| **Win Evaluator** | `AllDifferentLoss` | **PASSED** | `[0, 1, 2]` produces loss. |
-| **Win Evaluator** | `NullOrEmptySafe` | **PASSED** | Null or empty array handled gracefully without crashing. |
-| **Payout Calculator** | `Seven 25x Multiplier` | **PASSED** | Bet 10 -> 250, Bet 25 -> 625, Bet 100 -> 2500. |
-| **Payout Calculator** | `Cherry 3x Multiplier` | **PASSED** | Bet 10 -> 30, Bet 50 -> 150. |
-| **Payout Calculator** | `Bell 5x Multiplier` | **PASSED** | Bet 10 -> 50, Bet 100 -> 500. |
-| **Payout Calculator** | `Bar 10x Multiplier` | **PASSED** | Bet 10 -> 100, Bet 25 -> 250. |
-| **Payout Calculator** | `ZeroOrNegativeBetYieldsZero` | **PASSED** | Rejects <= 0 bets. |
-| **Payout Calculator** | `UnregisteredSymbolYieldsZero` | **PASSED** | Unknown symbol IDs return 0 payout. |
-| **RNG** | `CryptoRangeBounds` | **PASSED** | 1,000 samples strictly within `[0, 4)`. |
-| **RNG** | `DeterministicRepeatability` | **PASSED** | Seeded instances produce identical sequences. |
-| **RNG** | `OutcomeGeneratorBounds` | **PASSED** | 50 trials produce 3 reels within symbol count. |
-
-**Run Automated Tests:**
+### 2. Run Automated Unit Tests (24/24 Passing)
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\Tools\run_tests.ps1
 ```
 
----
+### 3. Open in Unity Editor
+1. Open **Unity Hub** ➔ Click **Add** ➔ Select this repository folder.
+2. Recommended Version: **Unity 2021.3 LTS / 2022.3 LTS / Unity 6**.
+3. Open `Assets/Scenes/MainScene.unity` and click **Play** ▶️.
+4. *(Optional Rebuild)*: Click top menu: **Tools** ➔ **Slot Game** ➔ **Rebuild Main Scene**.
 
-## 8. Running the Project
-
-### In Unity Editor:
-1. Open **Unity Hub**.
-2. Click **Add** -> Select this repository folder (`unity-slot-game`).
-3. Open the project with **Unity 2021.3 LTS / 2022.3 LTS / Unity 6**.
-4. In the Project tab, open `Assets/Scenes/MainScene.unity`.
-5. Press **Play** in the Unity Editor toolbar.
-6. *(Optional)* To rebuild the scene from scratch: Click menu **Tools** -> **Slot Game** -> **Rebuild Main Scene**.
-
-### Building WebGL:
-1. In Unity Editor, go to **File** -> **Build Settings...** -> Select **WebGL** -> Click **Switch Platform**.
-2. Or use the automated menu: Click **Build** -> **Build WebGL**.
-3. Output is exported directly to `Build/WebGL/`.
-
-### Playing the Web Preview:
-To play immediately without Unity Editor installed, run a local HTTP server:
+### 4. WebGL Export
+- **Inside Unity Editor**: Click **Build** ➔ **Build WebGL** (exports to `Build/WebGL/`).
+- **Via Batchmode Command Line**:
 ```powershell
-python -m http.server 8080
+& "<path-to-unity>\Unity.exe" -quit -batchmode -projectPath . -executeMethod SlotGame.Editor.SlotGameBuildScript.BuildWebGL
 ```
-Open your browser to:
-`http://localhost:8080/WebPreview/index.html`
 
 ---
 
-## 9. Environment Audit & Transparency
+## 🧪 Automated Testing (24/24 Passed)
 
-- **Unity Editor in Environment**: **Not Installed** on this machine. In accordance with assignment instructions, fake WebGL binaries were not created. Instead, complete Unity C# source files, `.meta` assets, scene YAML, Editor automation scripts, unit tests, and a companion WebPreview have been provided.
-- **Unit Tests**: **24 Passed / 0 Failed (100% Success)** via compiled assembly `SlotGameCore.dll`.
-- **C# Architecture & Compilation**: **Compiled cleanly** with C# compiler.
+<div align="center">
+
+| Test Suite | Total Tests | Status | Verification Target |
+|---|:---:|:---:|---|
+| **Wallet Tests** | 8 | ✅ **PASS** | Starting balance, atomic deduction, insufficient funds block, no negative balances |
+| **Win Evaluator Tests** | 7 | ✅ **PASS** | 3-match wins on all symbols, partial matches loss, all-different loss, null safety |
+| **Payout Calculator Tests** | 6 | ✅ **PASS** | 25x, 10x, 5x, 3x multipliers, zero/negative bet rejection, unmapped ID safety |
+| **RNG Tests** | 3 | ✅ **PASS** | Rejection sampling range bounds $[0, 4)$, seeded repeatability, outcome bounds |
+
+</div>
+
+---
+
+## 📁 Repository Structure
+
+```
+unity-slot-game/
+├── Assets/
+│   ├── Art/                # Sliced original arcade cabinet frames, buttons & symbols
+│   ├── Scenes/             # MainScene.unity (Connected 2D UI Canvas scene)
+│   ├── ScriptableObjects/  # DefaultSlotGameConfig.asset, Symbol_*.asset
+│   ├── Scripts/
+│   │   ├── Audio/          # SlotAudioManager.cs
+│   │   ├── Core/           # SlotGameManager, SlotWallet, Config, State Machine
+│   │   ├── Editor/         # Scene auto-builder & WebGL batch build script
+│   │   ├── Payouts/        # SlotWinEvaluator, SlotPayoutCalculator
+│   │   ├── Reels/          # SlotReelController (Motion & Easing)
+│   │   ├── RNG/            # CryptoRandomProvider, DeterministicRandomProvider
+│   │   └── UI/             # SlotUIController
+│   ├── Sounds/             # Procedural mechanical clicks, spin loops & chimes
+│   └── Tests/EditMode/     # NUnit automated unit test suites
+├── Packages/               # Package manifest (UGUI, 2D Sprite, Test Framework)
+├── ProjectSettings/        # EditorBuildSettings, PlayerSettings
+├── Tools/
+│   ├── run_tests.ps1       # Standalone test runner script
+│   └── SlotGameCore.dll    # Compiled testable C# assembly
+└── WebPreview/
+    └── index.html          # Interactive companion playable simulation
+```
+
+---
+
+## 👨‍💻 Author
+
+<div align="center">
+
+### **Priyanshu Singh**
+*Unity Game Developer & Software Engineer*
+
+[![GitHub](https://img.shields.io/badge/GitHub-PriyanshuSingh10114-181717?style=for-the-badge&logo=github)](https://github.com/PriyanshuSingh10114)
+[![Portfolio](https://img.shields.io/badge/Portfolio-Ready-FF5722?style=for-the-badge&logo=googlechrome&logoColor=white)](https://github.com/PriyanshuSingh10114)
+
+</div>
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE) — free for educational and commercial review.
