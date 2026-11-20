@@ -136,13 +136,6 @@ powershell -ExecutionPolicy Bypass -File .\Tools\run_tests.ps1
 & "<path-to-unity>\Unity.exe" -quit -batchmode -projectPath . -executeMethod SlotGame.Editor.SlotGameBuildScript.BuildWebGL
 ```
 
-### 5. Deploy to AWS (S3 & CloudFront / AWS Amplify)
-```powershell
-# Automated 1-Click AWS S3 Deployment
-.\Tools\deploy_aws_s3.ps1 -BucketName "unity-slot-machine-<unique-id>" -Region "us-east-1"
-```
-*Or connect your GitHub repository to **AWS Amplify** for automatic CI/CD deployment on every `git push`.*
-
 ---
 
 ## 🧪 Automated Testing (24/24 Passed)
