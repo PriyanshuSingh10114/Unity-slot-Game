@@ -12,8 +12,8 @@
       user-select: none;
     }
     body {
-      background: #0d0614;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #090410;
+      font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
       color: #fff;
       display: flex;
       flex-direction: column;
@@ -21,67 +21,81 @@
       justify-content: center;
       min-height: 100vh;
       overflow-x: hidden;
+      padding: 10px;
     }
     #game-container {
       position: relative;
-      width: 960px;
-      height: 640px;
+      width: 1000px;
+      height: 720px;
       background: url('../Assets/Art/Backgrounds/bg_gradient.png') no-repeat center center;
       background-size: cover;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-      border-radius: 12px;
+      box-shadow: 0 16px 50px rgba(0,0,0,0.9), 0 0 30px rgba(100,50,180,0.3);
+      border-radius: 16px;
+      border: 2px solid rgba(212,175,55,0.4);
       overflow: hidden;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
-    #cabinet {
+
+    /* Cabinet Master Frame (Native 816 x 624 scaled smoothly) */
+    #cabinet-stage {
+      position: relative;
+      width: 816px;
+      height: 560px;
+      margin-top: 10px;
+      transform-origin: top center;
+      transform: scale(0.92);
+    }
+    #cabinet-base {
       position: absolute;
-      top: 20px;
-      width: 680px;
-      height: 480px;
+      top: 0;
+      left: 0;
+      width: 816px;
+      height: 624px;
       background: url('../Assets/Art/Frames/slot-machine1.png') no-repeat center center;
       background-size: contain;
-      pointer-events: none;
-    }
-    #cabinet-overlay {
-      position: absolute;
-      top: 20px;
-      width: 680px;
-      height: 480px;
-      background: url('../Assets/Art/Frames/slot-machine4.png') no-repeat center center;
-      background-size: contain;
-      pointer-events: none;
-      z-index: 10;
+      z-index: 1;
     }
     #middle-box {
       position: absolute;
-      top: 178px;
-      left: 175px;
-      width: 330px;
-      height: 156px;
+      /* Precisely matches cabinet reel compartment */
+      top: 236px;
+      left: 215px;
+      width: 395px;
+      height: 228px;
       background: url('../Assets/Art/Frames/slot_machine_Middle_box.png') no-repeat center center;
       background-size: 100% 100%;
+      border-radius: 8px;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.85);
       z-index: 2;
     }
+    /* Reel Viewport precisely aligned with transparent windows in slot-machine4.png */
+    /* slot-machine4 cutouts: x=[229, 596] (w=367), y=[246, 455] (h=209) */
     #reel-viewport {
       position: absolute;
-      top: 184px;
-      left: 195px;
-      width: 290px;
-      height: 144px;
+      top: 246px;
+      left: 229px;
+      width: 367px;
+      height: 209px;
       overflow: hidden;
       display: flex;
       justify-content: space-between;
-      z-index: 5;
+      z-index: 3;
+      background: #14091c;
+      box-shadow: inset 0 10px 15px rgba(0,0,0,0.9), inset 0 -10px 15px rgba(0,0,0,0.9);
+      border-radius: 4px;
     }
     .reel-col {
-      width: 88px;
+      /* Columns match the cutouts in slot-machine4 */
+      width: 112px;
       height: 100%;
       position: relative;
       overflow: hidden;
-      border-radius: 4px;
-      background: rgba(20, 10, 25, 0.4);
+      background: linear-gradient(180deg, rgba(15,8,22,0.9) 0%, rgba(35,18,50,0.3) 30%, rgba(35,18,50,0.3) 70%, rgba(15,8,22,0.9) 100%);
+    }
+    .reel-col:not(:last-child) {
+      margin-right: 15px; /* Matches the 15px vertical cabinet dividers */
     }
     .reel-strip {
       position: absolute;
@@ -93,71 +107,119 @@
       align-items: center;
     }
     .reel-symbol {
-      width: 80px;
-      height: 80px;
+      width: 100px;
+      height: 70px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 4px 0;
     }
     .reel-symbol img {
-      width: 72px;
-      height: 72px;
+      width: 64px;
+      height: 64px;
       object-fit: contain;
-      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.8));
     }
+    #cabinet-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 816px;
+      height: 624px;
+      background: url('../Assets/Art/Frames/slot-machine4.png') no-repeat center center;
+      background-size: contain;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* Payline Center Indicator */
+    #payline-guide {
+      position: absolute;
+      top: 349px;
+      left: 225px;
+      width: 375px;
+      height: 2px;
+      background: rgba(255, 215, 0, 0.4);
+      box-shadow: 0 0 6px rgba(255, 215, 0, 0.8);
+      pointer-events: none;
+      z-index: 11;
+    }
+
+    /* Status Message Bar */
+    #status-bar-container {
+      position: absolute;
+      bottom: 135px;
+      width: 840px;
+      text-align: center;
+      z-index: 25;
+    }
+    #status-banner {
+      display: inline-block;
+      padding: 6px 28px;
+      background: rgba(14, 7, 24, 0.85);
+      border: 1px solid rgba(255, 215, 0, 0.6);
+      border-radius: 20px;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: #ffd700;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+      transition: all 0.2s ease;
+    }
+
     /* Dashboard */
     #dashboard {
       position: absolute;
-      bottom: 12px;
-      width: 900px;
-      height: 125px;
-      background: rgba(18, 10, 28, 0.92);
+      bottom: 15px;
+      width: 920px;
+      height: 115px;
+      background: linear-gradient(180deg, rgba(28, 16, 45, 0.96) 0%, rgba(14, 7, 24, 0.98) 100%);
       border: 2px solid #d4af37;
-      border-radius: 10px;
+      border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 24px;
-      box-shadow: inset 0 0 15px rgba(212,175,55,0.2);
+      padding: 10px 30px;
+      box-shadow: inset 0 0 20px rgba(212,175,55,0.25), 0 8px 25px rgba(0,0,0,0.8);
       z-index: 20;
     }
     .dash-section {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
     }
     .stat-label {
       font-size: 11px;
       font-weight: 700;
-      letter-spacing: 1px;
+      letter-spacing: 1.2px;
       color: #ffd700;
       text-transform: uppercase;
     }
     .stat-val {
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 900;
       color: #fff;
-      text-shadow: 0 0 8px rgba(255,215,0,0.6);
+      text-shadow: 0 0 10px rgba(255,215,0,0.6);
     }
     .bet-control {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
     .btn-step {
-      width: 36px;
-      height: 36px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #ffd700, #b8860b);
+      background: linear-gradient(145deg, #ffd700, #b8860b);
       border: 2px solid #fff;
-      color: #000;
+      color: #1a0a2a;
       font-size: 20px;
-      font-weight: bold;
+      font-weight: 900;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.6);
       transition: transform 0.1s, filter 0.1s;
     }
     .btn-step:hover:not(:disabled) {
@@ -168,118 +230,74 @@
       transform: scale(0.95);
     }
     .btn-step:disabled {
-      opacity: 0.4;
+      opacity: 0.35;
       cursor: not-allowed;
     }
-    /* Spin Button */
+
+    /* Glowing Arcade Spin Button */
     #btn-spin {
-      width: 88px;
-      height: 88px;
+      width: 90px;
+      height: 90px;
       border-radius: 50%;
-      background: url('../Assets/Art/Buttons/btn_spin_normal.png') no-repeat center center;
-      background-size: contain;
-      border: none;
+      background: radial-gradient(circle, #ff2a2a 0%, #b30000 65%, #660000 100%);
+      border: 4px solid #ffd700;
+      color: #ffffff;
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(255,0,0,0.5);
-      transition: transform 0.1s, filter 0.1s;
+      box-shadow: 0 0 25px rgba(255, 30, 30, 0.75), inset 0 2px 6px rgba(255,255,255,0.7), 0 6px 12px rgba(0,0,0,0.8);
+      transition: all 0.15s ease;
       outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+      animation: pulseGlow 2s infinite alternate;
+    }
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 15px rgba(255, 30, 30, 0.6), inset 0 2px 6px rgba(255,255,255,0.5); }
+      100% { box-shadow: 0 0 30px rgba(255, 60, 60, 0.95), inset 0 2px 8px rgba(255,255,255,0.8); }
     }
     #btn-spin:hover:not(:disabled) {
-      background-image: url('../Assets/Art/Buttons/btn_spin_highlighted.png');
-      transform: scale(1.06);
+      transform: scale(1.08);
+      filter: brightness(1.15);
     }
     #btn-spin:active:not(:disabled) {
-      background-image: url('../Assets/Art/Buttons/btn_spin_pressed.png');
-      transform: scale(0.96);
+      transform: scale(0.95);
+      box-shadow: 0 0 10px rgba(255, 30, 30, 0.8), inset 0 3px 8px rgba(0,0,0,0.8);
     }
     #btn-spin:disabled {
-      background-image: url('../Assets/Art/Buttons/btn_spin_disabled.png');
+      background: radial-gradient(circle, #4a2830 0%, #2b1820 100%);
+      border-color: #665030;
+      color: #887070;
       cursor: not-allowed;
-      filter: grayscale(0.8) opacity(0.6);
       transform: none;
       box-shadow: none;
+      animation: none;
+      text-shadow: none;
     }
+
     /* Side Buttons */
     .btn-side {
-      background: #2b1842;
+      background: linear-gradient(180deg, #321950, #1e0e32);
       border: 1px solid #d4af37;
       color: #ffd700;
-      padding: 6px 12px;
-      border-radius: 6px;
+      padding: 7px 14px;
+      border-radius: 8px;
       font-size: 11px;
-      font-weight: bold;
+      font-weight: 700;
       cursor: pointer;
-      transition: background 0.2s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+      transition: all 0.2s;
     }
     .btn-side:hover {
-      background: #47266e;
+      background: linear-gradient(180deg, #4c267a, #2a1346);
+      filter: brightness(1.15);
     }
-    #status-banner {
-      position: absolute;
-      top: 500px;
-      width: 100%;
-      text-align: center;
-      font-size: 16px;
-      font-weight: bold;
-      color: #ffd700;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-      z-index: 20;
-    }
-    /* Win Popup Modal */
-    #popup-modal {
-      display: none;
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.75);
-      z-index: 50;
-      align-items: center;
-      justify-content: center;
-    }
-    .popup-box {
-      width: 540px;
-      height: 300px;
-      background: url('../Assets/Art/Frames/popup.png') no-repeat center center;
-      background-size: contain;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      padding: 20px;
-      text-align: center;
-      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    @keyframes popIn {
-      0% { transform: scale(0.5); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    .popup-title {
-      font-size: 26px;
-      font-weight: 900;
-      color: #ffd700;
-      text-shadow: 0 0 10px rgba(255,215,0,0.8);
-    }
-    .popup-amount {
-      font-size: 32px;
-      font-weight: bold;
-      color: #fff;
-    }
-    .btn-claim {
-      background: linear-gradient(180deg, #ffd700, #cc9900);
-      color: #000;
-      border: 2px solid #fff;
-      padding: 8px 28px;
-      font-size: 16px;
-      font-weight: bold;
-      border-radius: 20px;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    }
-    /* Paytable modal */
-    #paytable-modal {
+
+    /* Modals */
+    #popup-modal, #paytable-modal {
       display: none;
       position: absolute;
       top: 0;
@@ -287,59 +305,119 @@
       width: 100%;
       height: 100%;
       background: rgba(0,0,0,0.8);
-      z-index: 45;
+      z-index: 60;
       align-items: center;
       justify-content: center;
+      backdrop-filter: blur(4px);
     }
+    .popup-box {
+      width: 580px;
+      height: 320px;
+      background: url('../Assets/Art/Frames/popup.png') no-repeat center center;
+      background-size: contain;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 20px;
+      text-align: center;
+      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .popup-title {
+      font-size: 28px;
+      font-weight: 900;
+      color: #ffd700;
+      text-shadow: 0 0 12px rgba(255,215,0,0.9);
+      letter-spacing: 1.5px;
+    }
+    .popup-amount {
+      font-size: 34px;
+      font-weight: 900;
+      color: #ffffff;
+      text-shadow: 0 3px 6px rgba(0,0,0,0.9);
+    }
+    .btn-claim {
+      background: linear-gradient(180deg, #ffd700, #cc9900);
+      color: #1a0a2a;
+      border: 2px solid #fff;
+      padding: 8px 32px;
+      font-size: 16px;
+      font-weight: 900;
+      border-radius: 25px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(255,215,0,0.5);
+      transition: transform 0.1s;
+    }
+    .btn-claim:hover {
+      transform: scale(1.06);
+    }
+
     .paytable-card {
-      width: 480px;
-      background: #1e1030;
+      width: 500px;
+      background: #190a2a;
       border: 2px solid #d4af37;
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 24px;
       text-align: center;
-      box-shadow: 0 0 30px rgba(212,175,55,0.4);
+      box-shadow: 0 0 40px rgba(212,175,55,0.4);
     }
     .pt-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 8px 16px;
+      padding: 10px 18px;
       border-bottom: 1px solid rgba(255,255,255,0.1);
     }
     .pt-sym {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
     }
     .pt-sym img {
-      width: 36px;
-      height: 36px;
+      width: 40px;
+      height: 40px;
     }
   </style>
 </head>
 <body>
 
   <div id="game-container">
-    <div id="cabinet"></div>
-    <div id="middle-box"></div>
+    <!-- Cabinet Stage with precise alignment -->
+    <div id="cabinet-stage">
+      <div id="cabinet-base"></div>
+      <div id="middle-box"></div>
 
-    <div id="reel-viewport">
-      <div class="reel-col" id="reel-0">
-        <div class="reel-strip" id="strip-0"></div>
+      <!-- Masked Reel Compartment -->
+      <div id="reel-viewport">
+        <div class="reel-col" id="reel-0">
+          <div class="reel-strip" id="strip-0"></div>
+        </div>
+        <div class="reel-col" id="reel-1">
+          <div class="reel-strip" id="strip-1"></div>
+        </div>
+        <div class="reel-col" id="reel-2">
+          <div class="reel-strip" id="strip-2"></div>
+        </div>
       </div>
-      <div class="reel-col" id="reel-1">
-        <div class="reel-strip" id="strip-1"></div>
-      </div>
-      <div class="reel-col" id="reel-2">
-        <div class="reel-strip" id="strip-2"></div>
-      </div>
+
+      <!-- Front Machine Overlay with Transparent Cutouts -->
+      <div id="cabinet-overlay"></div>
+
+      <!-- Payline Center Guide -->
+      <div id="payline-guide"></div>
     </div>
 
-    <div id="cabinet-overlay"></div>
+    <!-- Status Message Bar -->
+    <div id="status-bar-container">
+      <div id="status-banner">PRESS SPIN TO PLAY!</div>
+    </div>
 
-    <div id="status-banner">PRESS SPIN TO PLAY!</div>
-
+    <!-- Player Control Dashboard -->
     <div id="dashboard">
       <div class="dash-section">
         <span class="stat-label">Simulated Balance</span>
@@ -349,14 +427,14 @@
       <div class="dash-section">
         <span class="stat-label">Total Bet</span>
         <div class="bet-control">
-          <button class="btn-step" id="btn-bet-minus">-</button>
+          <button class="btn-step" id="btn-bet-minus" title="Decrease Bet">&#9664;</button>
           <span class="stat-val" id="disp-bet">10</span>
-          <button class="btn-step" id="btn-bet-plus">+</button>
+          <button class="btn-step" id="btn-bet-plus" title="Increase Bet">&#9654;</button>
         </div>
       </div>
 
       <div class="dash-section" style="align-items: center;">
-        <button id="btn-spin" title="Spin Reels"></button>
+        <button id="btn-spin" title="Spin Reels">SPIN</button>
       </div>
 
       <div class="dash-section">
@@ -371,7 +449,7 @@
       </div>
     </div>
 
-    <!-- Win Popup -->
+    <!-- Win Celebration Modal -->
     <div id="popup-modal">
       <div class="popup-box">
         <div class="popup-title" id="pop-title">MEGA JACKPOT!</div>
@@ -380,28 +458,28 @@
       </div>
     </div>
 
-    <!-- Paytable Modal -->
+    <!-- Payout Information Modal -->
     <div id="paytable-modal">
       <div class="paytable-card">
-        <h2 style="color: #ffd700; margin-bottom: 16px;">PAYOUT TABLE</h2>
+        <h2 style="color: #ffd700; margin-bottom: 16px; letter-spacing: 1px;">PAYOUT TABLE</h2>
         <div class="pt-row">
           <div class="pt-sym"><img src="../Assets/Art/Symbols/symbol_seven.png"><span>SEVEN (7-7-7)</span></div>
-          <span style="font-weight:bold; color:#ffd700;">25x Multiplier</span>
+          <span style="font-weight:900; color:#ffd700; font-size:18px;">25x Multiplier</span>
         </div>
         <div class="pt-row">
           <div class="pt-sym"><img src="../Assets/Art/Symbols/symbol_bar.png"><span>BAR (BAR-BAR-BAR)</span></div>
-          <span style="font-weight:bold; color:#ffd700;">10x Multiplier</span>
+          <span style="font-weight:900; color:#ffd700; font-size:18px;">10x Multiplier</span>
         </div>
         <div class="pt-row">
-          <div class="pt-sym"><img src="../Assets/Art/Symbols/symbol_bell.png"><span>BELL (🔔-🔔-🔔)</span></div>
-          <span style="font-weight:bold; color:#ffd700;">5x Multiplier</span>
+          <div class="pt-sym"><img src="../Assets/Art/Symbols/symbol_bell.png"><span>BELL (&#128276;-&#128276;-&#128276;)</span></div>
+          <span style="font-weight:900; color:#ffd700; font-size:18px;">5x Multiplier</span>
         </div>
         <div class="pt-row">
-          <div class="pt-sym"><img src="../Assets/Art/Symbols/symbol_cherry.png"><span>CHERRY (🍒-🍒-🍒)</span></div>
-          <span style="font-weight:bold; color:#ffd700;">3x Multiplier</span>
+          <div class="pt-sym"><img src="../Assets/Art/Symbols/symbol_cherry.png"><span>CHERRY (&#127826;-&#127826;-&#127826;)</span></div>
+          <span style="font-weight:900; color:#ffd700; font-size:18px;">3x Multiplier</span>
         </div>
-        <p style="font-size: 12px; color: #bbb; margin-top: 14px;">Win when all 3 reels match the same symbol.<br>Payout = Bet × Multiplier.</p>
-        <button class="btn-claim" style="margin-top: 16px;" id="pt-close">CLOSE</button>
+        <p style="font-size: 13px; color: #ccc; margin-top: 16px; line-height: 1.5;">Win condition: All 3 reels must match the exact same symbol across the payline.<br>Payout = Current Bet &times; Multiplier.</p>
+        <button class="btn-claim" style="margin-top: 18px;" id="pt-close">CLOSE</button>
       </div>
     </div>
   </div>
@@ -421,7 +499,7 @@
     let isAutoSpin = false;
     let isMuted = false;
 
-    // Audio elements
+    // Audio SFX
     const audioClick = new Audio('../Assets/Sounds/button_click.wav');
     const audioSpin = new Audio('../Assets/Sounds/reel_spin_loop.wav');
     audioSpin.loop = true;
@@ -437,20 +515,26 @@
       }
     }
 
-    // Initialize Reel Strips with repeating views for seamless looping
+    // Geometry: Viewport height is 209px. Symbol item height is 70px.
+    // 3 symbols visible: Top (offset ~0), Center (offset ~70, payline at 104px), Bottom (offset ~140)
     const strips = [document.getElementById('strip-0'), document.getElementById('strip-1'), document.getElementById('strip-2')];
     const reelCurrentPos = [0, 0, 0];
-    const symbolHeight = 88; // 80px + 8px margin
-    const visibleCount = 12;
+    const itemHeight = 70; // px
+    const stripLength = 16;
 
+    // Populate initial reel strips
     strips.forEach((strip, r) => {
-      for (let i = 0; i < visibleCount; i++) {
+      for (let i = 0; i < stripLength; i++) {
         const sym = SYMBOLS[(i + r) % SYMBOLS.length];
         const div = document.createElement('div');
         div.className = 'reel-symbol';
         div.innerHTML = `<img src="${sym.src}">`;
         strip.appendChild(div);
       }
+      // Initial alignment: Center symbol at row index 1
+      const initialY = - (1 * itemHeight - (209 - itemHeight) / 2);
+      strip.style.transform = `translateY(${initialY}px)`;
+      reelCurrentPos[r] = initialY;
     });
 
     const dispBal = document.getElementById('disp-balance');
@@ -517,7 +601,7 @@
       playSound(audioClick);
       isAutoSpin = !isAutoSpin;
       btnAuto.textContent = isAutoSpin ? 'STOP AUTO' : 'AUTO SPIN';
-      btnAuto.style.background = isAutoSpin ? '#dc2626' : '#2b1842';
+      btnAuto.style.background = isAutoSpin ? 'linear-gradient(180deg, #dc2626, #991b1b)' : 'linear-gradient(180deg, #321950, #1e0e32)';
       if (isAutoSpin && !isSpinning) {
         spin();
       }
@@ -527,7 +611,7 @@
       if (!isSpinning) spin();
     });
 
-    // Unbiased Cryptographic RNG
+    // Cryptographic Unbiased RNG
     function getRandomInt(min, maxExclusive) {
       const range = maxExclusive - min;
       const arr = new Uint32Array(1);
@@ -548,7 +632,7 @@
         if (isAutoSpin) {
           isAutoSpin = false;
           btnAuto.textContent = 'AUTO SPIN';
-          btnAuto.style.background = '#2b1842';
+          btnAuto.style.background = 'linear-gradient(180deg, #321950, #1e0e32)';
         }
         return;
       }
@@ -570,8 +654,8 @@
         getRandomInt(0, SYMBOLS.length)
       ];
 
-      // 3. Animate Reels with staggered stops
-      const spinDurationBase = 1200; // ms
+      // 3. Animate Reels with staggered stops and bounce easing
+      const spinDurationBase = 1100; // ms
       const staggerDelay = 350;      // ms
 
       const reelPromises = [0, 1, 2].map(r => {
@@ -581,7 +665,7 @@
           const targetSym = outcome[r];
 
           let start = null;
-          let speed = 25; // px per frame
+          let speed = 28; // px per frame
           let pos = reelCurrentPos[r];
 
           function animateReel(time) {
@@ -590,27 +674,40 @@
 
             if (elapsed < stopTime) {
               pos -= speed;
-              const loopSpan = (visibleCount - 3) * symbolHeight;
+              const loopSpan = (stripLength - 4) * itemHeight;
               if (pos < -loopSpan) pos += loopSpan;
               strip.style.transform = `translateY(${pos}px)`;
               requestAnimationFrame(animateReel);
             } else {
-              // Landing & deceleration: align center symbol to middle row
-              // Update center element sprite to target symbol
+              // Target Landing on center payline
               const centerIdx = 2;
               strip.children[centerIdx].querySelector('img').src = SYMBOLS[targetSym].src;
-              
-              // Bounce ease-out
-              const targetY = - (centerIdx * symbolHeight - 28);
-              strip.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2)';
-              strip.style.transform = `translateY(${targetY}px)`;
-              reelCurrentPos[r] = targetY;
+              // Populate neighbor symbols for realism
+              const prevIdx = (targetSym + SYMBOLS.length - 1) % SYMBOLS.length;
+              const nextIdx = (targetSym + 1) % SYMBOLS.length;
+              strip.children[centerIdx - 1].querySelector('img').src = SYMBOLS[prevIdx].src;
+              strip.children[centerIdx + 1].querySelector('img').src = SYMBOLS[nextIdx].src;
+
+              // Mechanical Overshoot Bounce
+              const finalY = - (centerIdx * itemHeight - (209 - itemHeight) / 2);
+              const overshootY = finalY - 14;
+
+              // Phase A: Overshoot downward
+              strip.style.transition = 'transform 0.14s ease-out';
+              strip.style.transform = `translateY(${overshootY}px)`;
 
               setTimeout(() => {
-                strip.style.transition = '';
-                playSound(audioStop);
-                resolve();
-              }, 400);
+                // Phase B: Rebound to center payline
+                strip.style.transition = 'transform 0.20s cubic-bezier(0.175, 0.885, 0.32, 1.25)';
+                strip.style.transform = `translateY(${finalY}px)`;
+                reelCurrentPos[r] = finalY;
+
+                setTimeout(() => {
+                  strip.style.transition = '';
+                  playSound(audioStop);
+                  resolve();
+                }, 200);
+              }, 140);
             }
           }
           requestAnimationFrame(animateReel);
@@ -631,13 +728,13 @@
         animateBalanceCounter(balance);
 
         if (winningSym.mult >= 20) {
-          statusBanner.textContent = `*** MEGA JACKPOT! 3x ${winningSym.name.toUpperCase()}! +${winAmount} CREDITS! ***`;
+          statusBanner.textContent = `*** MEGA JACKPOT! 3x ${winningSym.name.toUpperCase()}! +${winAmount.toLocaleString()} CREDITS! ***`;
           popTitle.textContent = `MEGA JACKPOT!`;
           popAmount.textContent = `+${winAmount.toLocaleString()} CREDITS`;
           popupModal.style.display = 'flex';
           playSound(audioJackpot);
         } else {
-          statusBanner.textContent = `WINNER! 3x ${winningSym.name.toUpperCase()}! +${winAmount} CREDITS (${winningSym.mult}x)!`;
+          statusBanner.textContent = `WINNER! 3x ${winningSym.name.toUpperCase()}! +${winAmount.toLocaleString()} CREDITS (${winningSym.mult}x)!`;
           playSound(audioWin);
         }
       } else {
@@ -657,7 +754,7 @@
 
     function animateBalanceCounter(target) {
       let current = parseInt(dispBal.textContent.replace(/,/g, '')) || 0;
-      const step = Math.ceil((target - current) / 20);
+      const step = Math.ceil((target - current) / 18);
       const timer = setInterval(() => {
         current += step;
         if (current >= target) {
