@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Classic 3-Reel Slot Machine</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+    body {
+      background: #0d0614;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    #game-container {
+      position: relative;
+      width: 960px;
+      height: 640px;
+      background: url('../Assets/Art/Backgrounds/bg_gradient.png') no-repeat center center;
+      background-size: cover;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #cabinet {
+      position: absolute;
+      top: 20px;
+      width: 680px;
+      height: 480px;
+      background: url('../Assets/Art/Frames/slot-machine1.png') no-repeat center center;
+      background-size: contain;
+      pointer-events: none;
+    }
+    #cabinet-overlay {
+      position: absolute;
+      top: 20px;
+      width: 680px;
+      height: 480px;
+      background: url('../Assets/Art/Frames/slot-machine4.png') no-repeat center center;
+      background-size: contain;
+      pointer-events: none;
+      z-index: 10;
+    }
+    #middle-box {
+      position: absolute;
+      top: 178px;
+      left: 175px;
+      width: 330px;
+      height: 156px;
+      background: url('../Assets/Art/Frames/slot_machine_Middle_box.png') no-repeat center center;
+      background-size: 100% 100%;
+      z-index: 2;
+    }
+    #reel-viewport {
+      position: absolute;
+      top: 184px;
+      left: 195px;
+      width: 290px;
+      height: 144px;
+      overflow: hidden;
+      display: flex;
+      justify-content: space-between;
+      z-index: 5;
+    }
+    .reel-col {
+      width: 88px;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      border-radius: 4px;
+      background: rgba(20, 10, 25, 0.4);
+    }
+    .reel-strip {
+      position: absolute;
+      width: 100%;
+      top: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .reel-symbol {
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 4px 0;
+    }
+    .reel-symbol img {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
+    }
+    /* Dashboard */
+    #dashboard {
+      position: absolute;
+      bottom: 12px;
+      width: 900px;
+      height: 125px;
+      background: rgba(18, 10, 28, 0.92);
+      border: 2px solid #d4af37;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 24px;
+      box-shadow: inset 0 0 15px rgba(212,175,55,0.2);
+      z-index: 20;
+    }
+    .dash-section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .stat-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #ffd700;
+      text-transform: uppercase;
+    }
+    .stat-val {
+      font-size: 20px;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 8px rgba(255,215,0,0.6);
+    }
+    .bet-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-step {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ffd700, #b8860b);
+      border: 2px solid #fff;
+      color: #000;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.1s, filter 0.1s;
+    }
+    .btn-step:hover:not(:disabled) {
+      filter: brightness(1.2);
+      transform: scale(1.08);
+    }
+    .btn-step:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+    .btn-step:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    /* Spin Button */
+    #btn-spin {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      background: url('../Assets/Art/Buttons/btn_spin_normal.png') no-repeat center center;
+      background-size: contain;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(255,0,0,0.5);
+      transition: transform 0.1s, filter 0.1s;
+      outline: none;
+    }
+    #btn-spin:hover:not(:disabled) {
+      background-image: url('../Assets/Art/Buttons/btn_spin_highlighted.png');
+      transform: scale(1.06);
+    }
+    #btn-spin:active:not(:disabled) {
+      background-image: url('../Assets/Art/Buttons/btn_spin_pressed.png');
+      transform: scale(0.96);
+    }
+    #btn-spin:disabled {
+      background-image: url('../Assets/Art/Buttons/btn_spin_disabled.png');
+      cursor: not-allowed;
+      filter: grayscale(0.8) opacity(0.6);
+      transform: none;
+      box-shadow: none;
+    }
+    /* Side Buttons */
+    .btn-side {
+      background: #2b1842;
+      border: 1px solid #d4af37;
+      color: #ffd700;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-side:hover {
+      background: #47266e;
+    }
+    #status-banner {
+      position: absolute;
+      top: 500px;
+      width: 100%;
+      text-align: center;
+      font-size: 16px;
+      font-weight: bold;
+      color: #ffd700;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+      z-index: 20;
+    }
+    /* Win Popup Modal */
+    #popup-modal {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.75);
+      z-index: 50;
+      align-items: center;
+      justify-content: center;
+    }
+    .popup-box {
+      width: 540px;
+      height: 300px;
+      background: url('../Assets/Art/Frames/popup.png') no-repeat center center;
+      background-size: contain;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 20px;
+      text-align: center;
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .popup-title {
+      font-size: 26px;
+      font-weight: 900;
+      color: #ffd700;
+      text-shadow: 0 0 10px rgba(255,215,0,0.8);
+    }
+    .popup-amount {
+      font-size: 32px;
+      font-weight: bold;
+      color: #fff;
+    }
+    .btn-claim {
+      background: linear-gradient(180deg, #ffd700, #cc9900);
+      color: #000;
+      border: 2px solid #fff;
+      padding: 8px 28px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 20px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+    /* Paytable modal */
+    #paytable-modal {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 45;
+      align-items: center;
+      justify-content: center;
+    }
+    .paytable-card {
+      width: 480px;
+      background: #1e1030;
+      border: 2px solid #d4af37;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(212,175,55,0.4);
+    }
+    .pt-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .pt-sym {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .pt-sym img {
+      width: 36px;
+      height: 36px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="game-container">
+    <div id="cabinet"></div>
+    <div id="middle-box"></div>
+
+    <div id="reel-viewport">
+      <div class="reel-col" id="reel-0">
+        <div class="reel-strip" id="strip-0"></div>
+      </div>
+      <div class="reel-col" id="reel-1">
+        <div class="reel-strip" id="strip-1"></div>
+      </div>
+      <div class="reel-col" id="reel-2">
+        <div class="reel-strip" id="strip-2"></div>
+      </div>
+    </div>
+
+    <div id="cabinet-overlay"></div>
+
+    <div id="status-banner">PRESS SPIN TO PLAY!</div>
+
+    <div id="dashboard">
+      <div class="dash-section">
+        <span class="stat-label">Simulated Balance</span>
+        <span class="stat-val" id="disp-balance">1,000</span>
+      </div>
+
+      <div class="dash-section">
+        <span class="stat-label">Total Bet</span>
+        <div class="bet-control">
+          <button class="btn-step" id="btn-bet-minus">-</button>
+          <span class="stat-val" id="disp-bet">10</span>
+          <button class="btn-step" id="btn-bet-plus">+</button>
+        </div>
+      </div>
+
+      <div class="dash-section" style="align-items: center;">
+        <button id="btn-spin" title="Spin Reels"></button>
+      </div>
+
+      <div class="dash-section">
+        <span class="stat-label">Last Win</span>
+        <span class="stat-val" id="disp-win" style="color: #4ade80;">0</span>
+      </div>
+
+      <div class="dash-section" style="gap: 8px;">
+        <button class="btn-side" id="btn-auto">AUTO SPIN</button>
+        <button class="btn-side" id="btn-paytable">PAYTABLE</button>
+        <button class="btn-side" id="btn-mute">SOUND: ON</button>
+      </div>
+    </div>
+
+    <!-- Win Popup -->
+    <div id="popup-modal">
+      <div class="popup-box">
+        <div class="popup-title" id="pop-title">MEGA JACKPOT!</div>
+        <div class="popup-amount" id="pop-amount">+250 CREDITS</div>
+        <button class="btn-claim" id="pop-claim">COLLECT</button>
+      </div>
+    </div>
+
+    <!-- Paytable Modal -->
+    <div id="paytable-modal">
+      <div class="paytable-card">
+        <h2 style="color: #ffd700; margin-bottom: 16px;">PAYOUT TABLE</h2>
+        <div class="pt-row">
+          <div class="pt-sym"><img src="../Assets/Art/Symbols/symbol_seven.png"><span>SEVEN (7-7-7)</span></div>
+          <span style="font-weight:bold; color:#ffd700;">25x Multiplier</span>
+        </div>
+        <div class="pt-row">
+          <div class="pt-sym"><img src="../Assets/Art/Symbols/symbol_bar.png"><span>BAR (BAR-BAR-BAR)</span></div>
+          <span style="font-weight:bold; color:#ffd700;">10x Multiplier</span>
+        </div>
+        <div class="pt-row">
+          <div class="pt-sym"><img src="../Assets/Art/Symbols/symbol_bell.png"><span>BELL (🔔-🔔-🔔)</span></div>
+          <span style="font-weight:bold; color:#ffd700;">5x Multiplier</span>
+        </div>
+        <div class="pt-row">
+          <div class="pt-sym"><img src="../Assets/Art/Symbols/symbol_cherry.png"><span>CHERRY (🍒-🍒-🍒)</span></div>
+          <span style="font-weight:bold; color:#ffd700;">3x Multiplier</span>
+        </div>
+        <p style="font-size: 12px; color: #bbb; margin-top: 14px;">Win when all 3 reels match the same symbol.<br>Payout = Bet × Multiplier.</p>
+        <button class="btn-claim" style="margin-top: 16px;" id="pt-close">CLOSE</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SYMBOLS = [
+      { id: 0, name: 'Seven', mult: 25, src: '../Assets/Art/Symbols/symbol_seven.png' },
+      { id: 1, name: 'Cherry', mult: 3, src: '../Assets/Art/Symbols/symbol_cherry.png' },
+      { id: 2, name: 'Bell', mult: 5, src: '../Assets/Art/Symbols/symbol_bell.png' },
+      { id: 3, name: 'Bar', mult: 10, src: '../Assets/Art/Symbols/symbol_bar.png' }
+    ];
+
+    const BET_OPTIONS = [10, 25, 50, 100];
+    let betIndex = 0;
+    let balance = 1000;
+    let isSpinning = false;
+    let isAutoSpin = false;
+    let isMuted = false;
+
+    // Audio elements
+    const audioClick = new Audio('../Assets/Sounds/button_click.wav');
+    const audioSpin = new Audio('../Assets/Sounds/reel_spin_loop.wav');
+    audioSpin.loop = true;
+    const audioStop = new Audio('../Assets/Sounds/reel_stop.wav');
+    const audioWin = new Audio('../Assets/Sounds/win_chime.wav');
+    const audioLoss = new Audio('../Assets/Sounds/loss_sound.wav');
+    const audioJackpot = new Audio('../Assets/Sounds/jackpot_fanfare.wav');
+
+    function playSound(snd) {
+      if (!isMuted && snd) {
+        snd.currentTime = 0;
+        snd.play().catch(() => {});
+      }
+    }
+
+    // Initialize Reel Strips with repeating views for seamless looping
+    const strips = [document.getElementById('strip-0'), document.getElementById('strip-1'), document.getElementById('strip-2')];
+    const reelCurrentPos = [0, 0, 0];
+    const symbolHeight = 88; // 80px + 8px margin
+    const visibleCount = 12;
+
+    strips.forEach((strip, r) => {
+      for (let i = 0; i < visibleCount; i++) {
+        const sym = SYMBOLS[(i + r) % SYMBOLS.length];
+        const div = document.createElement('div');
+        div.className = 'reel-symbol';
+        div.innerHTML = `<img src="${sym.src}">`;
+        strip.appendChild(div);
+      }
+    });
+
+    const dispBal = document.getElementById('disp-balance');
+    const dispBet = document.getElementById('disp-bet');
+    const dispWin = document.getElementById('disp-win');
+    const statusBanner = document.getElementById('status-banner');
+    const btnSpin = document.getElementById('btn-spin');
+    const btnMinus = document.getElementById('btn-bet-minus');
+    const btnPlus = document.getElementById('btn-bet-plus');
+    const btnAuto = document.getElementById('btn-auto');
+    const btnPaytable = document.getElementById('btn-paytable');
+    const btnMute = document.getElementById('btn-mute');
+
+    const popupModal = document.getElementById('popup-modal');
+    const popTitle = document.getElementById('pop-title');
+    const popAmount = document.getElementById('pop-amount');
+    const popClaim = document.getElementById('pop-claim');
+    const paytableModal = document.getElementById('paytable-modal');
+    const ptClose = document.getElementById('pt-close');
+
+    function updateUI() {
+      dispBal.textContent = balance.toLocaleString();
+      dispBet.textContent = BET_OPTIONS[betIndex];
+      btnMinus.disabled = isSpinning || betIndex === 0;
+      btnPlus.disabled = isSpinning || betIndex === BET_OPTIONS.length - 1;
+      btnSpin.disabled = isSpinning || balance < BET_OPTIONS[betIndex];
+    }
+
+    btnMinus.addEventListener('click', () => {
+      if (betIndex > 0) {
+        betIndex--;
+        playSound(audioClick);
+        updateUI();
+      }
+    });
+
+    btnPlus.addEventListener('click', () => {
+      if (betIndex < BET_OPTIONS.length - 1) {
+        betIndex++;
+        playSound(audioClick);
+        updateUI();
+      }
+    });
+
+    btnMute.addEventListener('click', () => {
+      isMuted = !isMuted;
+      btnMute.textContent = isMuted ? 'SOUND: OFF' : 'SOUND: ON';
+      if (isMuted) audioSpin.pause();
+    });
+
+    btnPaytable.addEventListener('click', () => {
+      playSound(audioClick);
+      paytableModal.style.display = 'flex';
+    });
+    ptClose.addEventListener('click', () => {
+      paytableModal.style.display = 'none';
+    });
+
+    popClaim.addEventListener('click', () => {
+      popupModal.style.display = 'none';
+    });
+
+    btnAuto.addEventListener('click', () => {
+      playSound(audioClick);
+      isAutoSpin = !isAutoSpin;
+      btnAuto.textContent = isAutoSpin ? 'STOP AUTO' : 'AUTO SPIN';
+      btnAuto.style.background = isAutoSpin ? '#dc2626' : '#2b1842';
+      if (isAutoSpin && !isSpinning) {
+        spin();
+      }
+    });
+
+    btnSpin.addEventListener('click', () => {
+      if (!isSpinning) spin();
+    });
+
+    // Unbiased Cryptographic RNG
+    function getRandomInt(min, maxExclusive) {
+      const range = maxExclusive - min;
+      const arr = new Uint32Array(1);
+      const maxUnbiased = Math.floor(0xFFFFFFFF / range) * range;
+      let val;
+      do {
+        window.crypto.getRandomValues(arr);
+        val = arr[0];
+      } while (val >= maxUnbiased);
+      return min + (val % range);
+    }
+
+    async function spin() {
+      const currentBet = BET_OPTIONS[betIndex];
+      if (balance < currentBet) {
+        statusBanner.textContent = 'INSUFFICIENT BALANCE! LOWER YOUR BET.';
+        playSound(audioLoss);
+        if (isAutoSpin) {
+          isAutoSpin = false;
+          btnAuto.textContent = 'AUTO SPIN';
+          btnAuto.style.background = '#2b1842';
+        }
+        return;
+      }
+
+      // 1. Atomic Bet Deduction
+      balance -= currentBet;
+      isSpinning = true;
+      updateUI();
+      dispWin.textContent = '0';
+      statusBanner.textContent = 'REELS SPINNING... GOOD LUCK!';
+
+      playSound(audioClick);
+      if (!isMuted) audioSpin.play().catch(() => {});
+
+      // 2. Generate Outcome before animation
+      const outcome = [
+        getRandomInt(0, SYMBOLS.length),
+        getRandomInt(0, SYMBOLS.length),
+        getRandomInt(0, SYMBOLS.length)
+      ];
+
+      // 3. Animate Reels with staggered stops
+      const spinDurationBase = 1200; // ms
+      const staggerDelay = 350;      // ms
+
+      const reelPromises = [0, 1, 2].map(r => {
+        return new Promise(resolve => {
+          const stopTime = spinDurationBase + r * staggerDelay;
+          const strip = strips[r];
+          const targetSym = outcome[r];
+
+          let start = null;
+          let speed = 25; // px per frame
+          let pos = reelCurrentPos[r];
+
+          function animateReel(time) {
+            if (!start) start = time;
+            const elapsed = time - start;
+
+            if (elapsed < stopTime) {
+              pos -= speed;
+              const loopSpan = (visibleCount - 3) * symbolHeight;
+              if (pos < -loopSpan) pos += loopSpan;
+              strip.style.transform = `translateY(${pos}px)`;
+              requestAnimationFrame(animateReel);
+            } else {
+              // Landing & deceleration: align center symbol to middle row
+              // Update center element sprite to target symbol
+              const centerIdx = 2;
+              strip.children[centerIdx].querySelector('img').src = SYMBOLS[targetSym].src;
+              
+              // Bounce ease-out
+              const targetY = - (centerIdx * symbolHeight - 28);
+              strip.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2)';
+              strip.style.transform = `translateY(${targetY}px)`;
+              reelCurrentPos[r] = targetY;
+
+              setTimeout(() => {
+                strip.style.transition = '';
+                playSound(audioStop);
+                resolve();
+              }, 400);
+            }
+          }
+          requestAnimationFrame(animateReel);
+        });
+      });
+
+      await Promise.all(reelPromises);
+      audioSpin.pause();
+
+      // 4. Evaluate Result
+      const isWin = (outcome[0] === outcome[1] && outcome[1] === outcome[2]);
+      if (isWin) {
+        const winningSym = SYMBOLS[outcome[0]];
+        const winAmount = currentBet * winningSym.mult;
+        balance += winAmount;
+
+        dispWin.textContent = winAmount.toLocaleString();
+        animateBalanceCounter(balance);
+
+        if (winningSym.mult >= 20) {
+          statusBanner.textContent = `*** MEGA JACKPOT! 3x ${winningSym.name.toUpperCase()}! +${winAmount} CREDITS! ***`;
+          popTitle.textContent = `MEGA JACKPOT!`;
+          popAmount.textContent = `+${winAmount.toLocaleString()} CREDITS`;
+          popupModal.style.display = 'flex';
+          playSound(audioJackpot);
+        } else {
+          statusBanner.textContent = `WINNER! 3x ${winningSym.name.toUpperCase()}! +${winAmount} CREDITS (${winningSym.mult}x)!`;
+          playSound(audioWin);
+        }
+      } else {
+        statusBanner.textContent = 'TRY AGAIN! SPIN FOR 3 MATCHING SYMBOLS.';
+        playSound(audioLoss);
+      }
+
+      isSpinning = false;
+      updateUI();
+
+      if (isAutoSpin) {
+        setTimeout(() => {
+          if (isAutoSpin && !isSpinning) spin();
+        }, 800);
+      }
+    }
+
+    function animateBalanceCounter(target) {
+      let current = parseInt(dispBal.textContent.replace(/,/g, '')) || 0;
+      const step = Math.ceil((target - current) / 20);
+      const timer = setInterval(() => {
+        current += step;
+        if (current >= target) {
+          current = target;
+          clearInterval(timer);
+        }
+        dispBal.textContent = current.toLocaleString();
+      }, 30);
+    }
+
+    updateUI();
+  </script>
+</body>
+</html>
